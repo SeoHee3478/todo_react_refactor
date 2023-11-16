@@ -3,9 +3,16 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import RedArrowIcon from '@/assets/RedArrowIcon';
+import { useFilterStore } from '@/store/filter';
 
 const TodoList = () => {
   const [todoList, setTodoList] = useState<TodoItem[]>([]);
+  const { filter, setFilter } = useFilterStore();
+
+  useEffect(() => {
+    getTodoList();
+  }, []);
+
   const getTodoList = async () => {
     try {
       const response = await axios.get<TodoListResponse>('http://localhost:33088/api/todolist');
@@ -37,14 +44,27 @@ const TodoList = () => {
     }
   };
 
-  useEffect(() => {
-    getTodoList();
-  }, []);
+  const filterTodoList = (todoItems: TodoItem[]) => {
+    switch (filter) {
+      case 'done':
+        return todoItems.filter((todo) => todo.done);
+      case 'undone':
+        return todoItems.filter((todo) => !todo.done);
+      default:
+        return todoItems;
+    }
+  };
 
   return (
     <TodoListContainer>
+      {/* Filter Buttons */}
+      <div>
+        <button onClick={() => setFilter('all')}>All</button>
+        <button onClick={() => setFilter('done')}>Done</button>
+        <button onClick={() => setFilter('undone')}>Undone</button>
+      </div>
       <ul>
-        {todoList?.map((todoItem) => (
+        {filterTodoList(todoList)?.map((todoItem) => (
           <TodoItem key={todoItem._id} className={todoItem.done ? 'done' : ''}>
             <div onClick={() => toggleCheckbox(todoItem._id, todoItem.done)}>
               <input type="checkbox" id="checkbox" className={todoItem.done ? 'done' : ''} />
