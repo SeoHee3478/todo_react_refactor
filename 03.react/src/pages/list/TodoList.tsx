@@ -55,6 +55,15 @@ const TodoList = () => {
     }
   };
 
+  const sortTodoList = (sortByLatest: boolean) => {
+    const sortedTodoList = [...todoList].sort((a, b) => {
+      const dateA = new Date(a.updatedAt).getTime();
+      const dateB = new Date(b.updatedAt).getTime();
+      return sortByLatest ? dateB - dateA : dateA - dateB;
+    });
+    setTodoList(sortedTodoList);
+  };
+
   return (
     <TodoListContainer>
       {/* Filter Buttons */}
@@ -62,6 +71,8 @@ const TodoList = () => {
         <button onClick={() => setFilter('all')}>All</button>
         <button onClick={() => setFilter('done')}>Done</button>
         <button onClick={() => setFilter('undone')}>Undone</button>
+        <button onClick={() => { sortTodoList(false) }}>오래된순</button>
+        <button onClick={() => { sortTodoList(true) }}>최신순</button>
       </div>
       <ul>
         {filterTodoList(todoList)?.map((todoItem) => (
