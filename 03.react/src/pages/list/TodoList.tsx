@@ -7,8 +7,8 @@ import { useFilterStore } from '@/store/filter';
 
 const TodoList = () => {
   const [todoList, setTodoList] = useState<TodoItem[]>([]);
-  const [searchData, setSearchData] = useState<string>('');
   const { filter, setFilter } = useFilterStore();
+  const searchInput = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     getTodoList();
@@ -65,25 +65,22 @@ const TodoList = () => {
     setTodoList(sortedTodoList);
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const searchValue = e.target.value;
-    if (!searchValue) {
-      setSearchData('');
-      return;
-    }
-    setSearchData(searchValue)
-  }
-
   const handleSearch = () => {
     // 검색어에 따라 Todo 리스트를 필터링 하는 함수
-    const searchList = todoList.filter((item) => item.title.toLowerCase().includes(searchData.toLowerCase()))
-    setTodoList(searchList);
+    const searchTerm = searchInput.current?.value.toLowerCase();
+    if (searchTerm) {
+      const searchList = todoList.filter((item) => item.title.toLowerCase().includes(searchTerm))
+      setTodoList(searchList);
+    }
   }
 
   const handleReset = () => {
     // 검색어를 초기화하고 전체 Todo 리스트를 가져오는 함수
-    setSearchData('');
+    if (searchInput.current) {
+      searchInput.current.value = "";
+    }
     getTodoList();
+    searchInput.current?.focus();
   }
 
   return (
@@ -96,7 +93,7 @@ const TodoList = () => {
         <button onClick={() => { sortTodoList(false) }}>오래된순</button>
         <button onClick={() => { sortTodoList(true) }}>최신순</button>
       </div>
-      <Input placeholder="검색 값을 입력하세요" onChange={handleInputChange} />
+      <Input placeholder="검색 값을 입력하세요" ref={searchInput} />
       <button onClick={handleSearch}>검색</button>
       <button onClick={handleReset}>초기화</button>
       <ul>
