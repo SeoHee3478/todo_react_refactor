@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import RedArrowIcon from '@/assets/RedArrowIcon';
@@ -7,6 +7,7 @@ import { useFilterStore } from '@/store/filter';
 
 const TodoList = () => {
   const [todoList, setTodoList] = useState<TodoItem[]>([]);
+  const [searchData, setSearchData] = useState<string>('');
   const { filter, setFilter } = useFilterStore();
 
   useEffect(() => {
@@ -64,6 +65,27 @@ const TodoList = () => {
     setTodoList(sortedTodoList);
   };
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const searchValue = e.target.value;
+    if (!searchValue) {
+      setSearchData('');
+      return;
+    }
+    setSearchData(searchValue)
+  }
+
+  const handleSearch = () => {
+    // 검색어에 따라 Todo 리스트를 필터링 하는 함수
+    const searchList = todoList.filter((item) => item.title.toLowerCase().includes(searchData.toLowerCase()))
+    setTodoList(searchList);
+  }
+
+  const handleReset = () => {
+    // 검색어를 초기화하고 전체 Todo 리스트를 가져오는 함수
+    setSearchData('');
+    getTodoList();
+  }
+
   return (
     <TodoListContainer>
       {/* Filter Buttons */}
@@ -74,6 +96,9 @@ const TodoList = () => {
         <button onClick={() => { sortTodoList(false) }}>오래된순</button>
         <button onClick={() => { sortTodoList(true) }}>최신순</button>
       </div>
+      <Input placeholder="검색 값을 입력하세요" onChange={handleInputChange} />
+      <button onClick={handleSearch}>검색</button>
+      <button onClick={handleReset}>초기화</button>
       <ul>
         {filterTodoList(todoList)?.map((todoItem) => (
           <TodoItem key={todoItem._id} className={todoItem.done ? 'done' : ''}>
@@ -108,6 +133,12 @@ const TodoListContainer = styled.div`
     border-radius: 5px;
     margin-top: 5px;
   }
+`;
+
+const Input = styled.input`
+width: 100%;
+min-height: 30px;
+margin: 5px 0px;
 `;
 
 const TodoItem = styled.li`
